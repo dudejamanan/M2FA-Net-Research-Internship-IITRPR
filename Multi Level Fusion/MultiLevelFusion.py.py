@@ -76,26 +76,26 @@ class CombinedLoss(nn.Module):
         
         # 3. Boundary Loss using Laplacian kernel
         # Create Laplacian kernel for edge detection
-        # laplacian_kernel = torch.tensor([[[[0, 1, 0],
-        #                                   [1, -4, 1],
-        #                                   [0, 1, 0]]]], 
-        #                                device=preds.device, 
-        #                                dtype=torch.float32)
+        laplacian_kernel = torch.tensor([[[[0, 1, 0],
+                                          [1, -4, 1],
+                                          [0, 1, 0]]]], 
+                                       device=preds.device, 
+                                       dtype=torch.float32)
         
         # # Apply Laplacian to predictions and targets
-        # pred_edges = F.conv2d(preds_dice.unsqueeze(1), laplacian_kernel, padding=1)
-        # target_edges = F.conv2d(targets_dice.unsqueeze(1), laplacian_kernel, padding=1)
+        pred_edges = F.conv2d(preds_dice.unsqueeze(1), laplacian_kernel, padding=1)
+        target_edges = F.conv2d(targets_dice.unsqueeze(1), laplacian_kernel, padding=1)
         
         # # Boundary loss is L1 difference between edge maps
-        # boundary_loss = F.l1_loss(pred_edges, target_edges)
+        boundary_loss = F.l1_loss(pred_edges, target_edges)
         
         # # Combined loss
-        # total_loss = (self.weight_ce * ce_loss + 
-        #              self.weight_dice * dice_loss + 
-        #              self.weight_boundary * boundary_loss)
-        
         total_loss = (self.weight_ce * ce_loss + 
-                     self.weight_dice * dice_loss)
+                     self.weight_dice * dice_loss + 
+                     self.weight_boundary * boundary_loss)
+        
+        # total_loss = (self.weight_ce * ce_loss + 
+        #              self.weight_dice * dice_loss)
         
         return total_loss
 # ====================== Warmup Cosine Scheduler ======================
@@ -691,6 +691,138 @@ def train_model(model, train_loader, val_loader, device, config, use_warmup=True
     
     return best_iou, best_metrics
 
+# ====================== SAVE PREDICTIONS FOR ABLATION ======================
+@torch.no_grad()
+def save_ablation_predictions(
+    model,
+    dataset,
+    device,
+    save_dir,
+    variant_name,
+    sample_indices=[1, 5, 10, 15, 20]
+):
+    """
+    Save predictions for fixed sample indices.
+    """
+
+    print(f"\n🎨 Saving predictions for: {variant_name}")
+
+    model.eval()
+
+    # create folder name safely
+    variant_folder = os.path.join(
+        save_dir,
+        variant_name.replace(" ", "_").replace(":", "")
+    )
+
+    os.makedirs(variant_folder, exist_ok=True)
+
+    fig, axes = plt.subplots(
+        len(sample_indices),
+        3,
+        figsize=(14, 4 * len(sample_indices))
+    )
+
+    if len(sample_indices) == 1:
+        axes = [axes]
+
+    for row, idx in enumerate(sample_indices):
+
+        # ======================
+        # LOAD SAMPLE
+        # ======================
+        rgb, ms, mask = dataset[idx]
+
+        # ======================
+        # RGB VISUALIZATION
+        # ======================
+        rgb_vis = rgb.clone()
+
+        mean = torch.tensor([0.485, 0.456, 0.406]).view(3,1,1)
+        std  = torch.tensor([0.229, 0.224, 0.225]).view(3,1,1)
+
+        rgb_vis = rgb_vis * std + mean
+
+        rgb_vis = rgb_vis.permute(1,2,0).cpu().numpy()
+        rgb_vis = np.clip(rgb_vis, 0, 1)
+
+        # ======================
+        # MODEL INPUT
+        # ======================
+        rgb_input = rgb.unsqueeze(0).to(device)
+        ms_input  = ms.unsqueeze(0).to(device)
+
+        # ======================
+        # PREDICTION
+        # ======================
+        with torch.no_grad():
+
+            if device.type == "cuda":
+
+                with torch.cuda.amp.autocast():
+
+                    output = model(rgb_input, ms_input)
+
+            else:
+
+                output = model(rgb_input, ms_input)
+
+        # handle tuple output
+        if isinstance(output, tuple):
+
+            if len(output) == 2:
+                preds = output[0]
+            else:
+                preds = output
+
+        else:
+            preds = output
+
+        pred_mask = torch.argmax(
+            preds,
+            dim=1
+        ).squeeze(0).cpu().numpy()
+
+        gt_mask = mask.cpu().numpy()
+
+        # ======================
+        # RGB
+        # ======================
+        axes[row, 0].imshow(rgb_vis)
+        axes[row, 0].set_title(f"RGB Image ({idx})")
+        axes[row, 0].axis("off")
+
+        # ======================
+        # GROUND TRUTH
+        # ======================
+        axes[row, 1].imshow(gt_mask, cmap='gray')
+        axes[row, 1].set_title("Ground Truth")
+        axes[row, 1].axis("off")
+
+        # ======================
+        # PREDICTION
+        # ======================
+        axes[row, 2].imshow(pred_mask, cmap='gray')
+        axes[row, 2].set_title("Prediction")
+        axes[row, 2].axis("off")
+
+    plt.tight_layout()
+
+    save_path = os.path.join(
+        variant_folder,
+        "sample_predictions.png"
+    )
+
+    plt.savefig(
+        save_path,
+        dpi=300,
+        bbox_inches='tight'
+    )
+
+    plt.close()
+
+    print(f"✅ Saved predictions to: {save_path}")
+
 # ====================== ABLATION STUDY MAIN ======================
 def run_ablation_study():
     """Run complete ablation study with multiple runs - 20 epochs"""
@@ -698,8 +830,12 @@ def run_ablation_study():
     root = "D:/IIT_Ropar/Datasets/Agriculture/WeedyRice-RGBMS-DB"
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
+
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    save_dir = f"ablation_study_results_20epochs_{timestamp}"
+    os.makedirs(save_dir, exist_ok=True)
     
-    NUM_RUNS = 5  # Number of runs for statistical significance
+    NUM_RUNS = 1 # Number of runs for statistical significance
     NUM_EPOCHS = 20  # ← CHANGED TO 20 EPOCHS (matches original)
     
     # Define all model variants for ablation
@@ -826,6 +962,17 @@ def run_ablation_study():
             
             # Evaluate on test set
             test_metrics = evaluate(model, test_loader, device, name=f"Test Run {run+1}")
+
+            # ======================
+            # SAVE SAMPLE PREDICTIONS
+            # ======================
+            save_ablation_predictions(
+                model=model,
+                dataset=val_dataset,
+                device=device,
+                save_dir=save_dir,
+                variant_name=f"{variant_name}_Run_{run+1}"
+)
             
             run_results.append({
                 'run': run + 1,
@@ -886,9 +1033,7 @@ def run_ablation_study():
     print("="*120)
     
     # ====================== SAVE RESULTS ======================
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    save_dir = f"ablation_study_results_20epochs_{timestamp}"
-    os.makedirs(save_dir, exist_ok=True)
+    
     
     # Save as CSV
     df_rows = []
