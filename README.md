@@ -46,7 +46,7 @@ Weedy rice is morphologically very similar to cultivated rice during early growt
 ## Architecture
 
 <p align="center">
-  <img src="./RP images/architecture.png" alt="M2FA-Net Architecture" width="800"/>
+  <img src="./RP images/MNet_architecture.png" alt="M2FA-Net Architecture" width="800"/>
 </p>
 
 **Pipeline:**
@@ -139,11 +139,21 @@ NDRE = (NIR − RE) / (NIR + RE)
 
 Dataset source: [Mendeley Data — vt4s83pxx6](https://data.mendeley.com/datasets/vt4s83pxx6/1)
 
+<p align="center">
+  <img src="./RP images/Dataset_Sample3.png" alt="Dataset sample" width="600"/>
+  <br/><em>Sample RGB + multispectral bands + overlay + ground-truth mask from WeedyRice-RGBMS-DB.</em>
+</p>
+
 To use the dataset, download it and place it under `Dataset/WeedyRice-RGBMS-DB/` following the structure above, or update the paths in `train_list.txt` / `val_list.txt` / `test_list.txt`.
 
 ## Results
 
 All models trained under identical settings and evaluated with **Accuracy, Precision, Recall, IoU, and Dice** (mean ± std over 5 runs).
+
+<p align="center">
+  <img src="./RP images/Comparison_new.png" alt="Qualitative comparison of segmentation results" width="800"/>
+  <br/><em>Qualitative comparison of crop–weed segmentation results across models.</em>
+</p>
 
 | Method | Accuracy (%) | Precision (%) | Recall (%) | IoU (%) | Dice (%) |
 |---|---|---|---|---|---|
@@ -182,6 +192,25 @@ Impact of each architectural component (mean ± std, %):
 
 Relative IoU contribution ranking: **Multi-Level Fusion (4.11%) > Warmup Scheduler (3.89%) > Deep Supervision (3.55%) > CBAM Attention (3.17%) > Data Augmentation (2.61%)**.
 
+<p align="center">
+  <img src="./RP images/ablation_iou_dice (2).png" alt="Ablation IoU and Dice" width="480"/>
+  <img src="./RP images/contribution_new.png" alt="Component contribution" width="480"/>
+</p>
+
+### Hyperparameter Sensitivity
+
+<p align="center">
+  <img src="./RP images/batchsize_ioudice.png" alt="Effect of batch size" width="320"/>
+  <img src="./RP images/learningrate_ioudice.png" alt="Effect of learning rate" width="320"/>
+</p>
+
+### Training Dynamics
+
+<p align="center">
+  <img src="./RP images/loss_curves (1).png" alt="Training and validation loss curves" width="480"/>
+  <img src="./RP images/ioudice_new.png" alt="Validation IoU and Dice across training" width="480"/>
+</p>
+
 ## Computational Complexity
 
 Measured at 512×512 input resolution, batch size 1, on an NVIDIA RTX A5000 (24GB):
@@ -200,6 +229,10 @@ Measured at 512×512 input resolution, batch size 1, on an NVIDIA RTX A5000 (24G
 | **M²FA-Net (Proposed)** | **64.30** | **267.68** | **40.22** |
 
 M²FA-Net is more computationally demanding than lightweight architectures (PSPNet, SegFormer) but remains lighter in parameter count than several hybrid/transformer baselines while delivering substantially higher segmentation accuracy — a trade-off justified for precision-agriculture applications where segmentation quality is critical.
+
+<p align="center">
+  <img src="./RP images/parameters.png" alt="Parameter count comparison" width="600"/>
+</p>
 
 ## Installation
 
