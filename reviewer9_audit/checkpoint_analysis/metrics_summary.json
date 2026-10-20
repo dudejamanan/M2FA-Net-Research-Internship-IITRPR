@@ -1,0 +1,15 @@
+{
+  "n": 148,
+  "provisional": false,
+  "mean_per_image_iou": 0.7716136803882617,
+  "mean_per_image_dice": 0.8634182664030354,
+  "pooled_pixel_iou": 0.8427766582840628,
+  "pooled_pixel_dice": 0.9146812821786343,
+  "mean_batch4_iou": 0.7975494011074646,
+  "mean_batch4_dice": 0.8849610937446376,
+  "nearest_gt_mean_per_image_iou": 0.7685806767238822,
+  "native_weed_below5pct_count": 19,
+  "native_weed_below5pct_mean_iou": 0.5733544750443904,
+  "note": "One supplied checkpoint with original normalization verified. Different aggregation rules are distinct metrics; none is a five-run paper result.",
+  "verification": "All 148 saved binary masks independently rescored against original-code resized test GT; counts and scores agree."
+}

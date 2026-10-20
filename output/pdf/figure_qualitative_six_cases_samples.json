@@ -1,0 +1,44 @@
+[
+  {
+    "panel": "a",
+    "condition": "Sparse weed region",
+    "filename": "DJI_DateTime_2024_06_04_09_25_0199_lat_10.3020021_lon_105.2721516_alt_20.218m.JPG",
+    "iou": 0.23573825503355705,
+    "dice": 0.38153428377460963
+  },
+  {
+    "panel": "b",
+    "condition": "Small isolated weed regions",
+    "filename": "DJI_DateTime_2024_06_04_09_20_0119_lat_10.3011328_lon_105.2724032_alt_20.255m.JPG",
+    "iou": 0.4856774193548387,
+    "dice": 0.6538127496960222
+  },
+  {
+    "panel": "c",
+    "condition": "Uneven brightness",
+    "filename": "DJI_DateTime_2024_06_04_11_07_0066_lat_10.3005700_lon_105.2715969_alt_20.223m.JPG",
+    "iou": 0.8924989766680311,
+    "dice": 0.9431962581447536
+  },
+  {
+    "panel": "d",
+    "condition": "Dense vegetation",
+    "filename": "DJI_DateTime_2025_01_15_15_14_0019_lat_10.3632620_lon_105.4196284_alt_20.465m.JPG",
+    "iou": 0.7178481110743242,
+    "dice": 0.8357527146278253
+  },
+  {
+    "panel": "e",
+    "condition": "Darker canopy",
+    "filename": "DJI_DateTime_2025_01_15_14_56_0088_lat_10.3618167_lon_105.4227889_alt_12.000m.JPG",
+    "iou": 0.8800616530501332,
+    "dice": 0.9362050990427447
+  },
+  {
+    "panel": "f",
+    "condition": "Dense irregular canopy",
+    "filename": "DJI_DateTime_2025_01_15_14_53_0022_lat_10.3622227_lon_105.4231242_alt_11.954m.JPG",
+    "iou": 0.8809404078479963,
+    "dice": 0.9367020923920599
+  }
+]

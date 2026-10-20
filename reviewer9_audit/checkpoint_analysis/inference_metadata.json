@@ -1,0 +1,45 @@
+{
+  "checkpoint": "M:\\Research Internship IITRPR\\best_model_MultiLevelFusionDeepLab.pth",
+  "checkpoint_sha256": "7d42e281b7f26709045a15ebf718b6e8b0a3334c5ce22d322872c448e7268f52",
+  "source_sha256": "49d77b793dfd4a3774e50b8a966c2c59394142f15880a52e148b92a45e08a75c",
+  "torch_version": "2.12.0+cpu",
+  "device": "cpu",
+  "normalization": {
+    "mean": [
+      0.0008402232787163596,
+      0.0006281544779189203,
+      0.0009729369461364177,
+      0.0009118726965546029,
+      0.59684027411622,
+      0.4883656105766558
+    ],
+    "std": [
+      0.00022529093370577278,
+      0.00019528695552813988,
+      0.00024980010689910263,
+      0.00015139107721111924,
+      0.06112834738065663,
+      0.03495100536064742
+    ],
+    "source": "M:\\Research Internship IITRPR\\ms_mean_std.npy",
+    "sha256": "833d62652dc5bcd929b0e24a2d23430f005de70cb53d2ebba79981d38b244a6c",
+    "provisional": false
+  },
+  "strict_state_tensors": 703,
+  "resize": [
+    512,
+    512
+  ],
+  "mask_rule": "cv2 default bilinear resize then >0, matching existing code",
+  "split": "test",
+  "selection": "all 148 supplied test samples; shortlist first for early inspection",
+  "normalization_verification": {
+    "original_file_added_during_inference": true,
+    "exact_match_to_reconstruction": true,
+    "max_abs_difference": {
+      "mean": 0.0,
+      "std": 0.0
+    },
+    "rerun_needed": false
+  }
+}
